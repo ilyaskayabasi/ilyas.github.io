@@ -1,0 +1,41 @@
+[
+  {
+    "id": "b001",
+    "title": "Çiçek Balı (500g)",
+    "slug": "cicek-bali-500g",
+    "brand": "Kayabaşı",
+    "price_cents": 15000,
+    "currency": "TRY",
+    "description": "Doğal, katkısız çiçek balı. Yerel üretim.",
+    "images": ["https://via.placeholder.com/400x300?text=Çiçek+Balı"],
+    "category": "Bal",
+    "stock": 24,
+    "tags": ["doğal","organik"]
+  },
+  {
+    "id": "b002",
+    "title": "Polen Karışımı (100g)",
+    "slug": "polen-100g",
+    "brand": "Kayabaşı",
+    "price_cents": 4500,
+    "currency": "TRY",
+    "description": "Enerji verici doğal polen.",
+    "images": ["https://via.placeholder.com/400x300?text=Polen"],
+    "category": "Polen",
+    "stock": 40,
+    "tags": ["vitamin"]
+  },
+  {
+    "id": "b003",
+    "title": "Propolis Damlası (30ml)",
+    "slug": "propolis-30ml",
+    "brand": "Kayabaşı",
+    "price_cents": 9000,
+    "currency": "TRY",
+    "description": "Bağışıklık desteği için propolis.",
+    "images": ["https://via.placeholder.com/400x300?text=Propolis"],
+    "category": "Propolis",
+    "stock": 15,
+    "tags": ["bağışıklık"]
+  }
+]

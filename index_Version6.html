@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kayabaşı Arı Ürünleri</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">Kayabaşı Arı Ürünleri</div>
+    <nav>
+      <a href="#home">Ana Sayfa</a>
+      <a href="#shop">Mağaza</a>
+      <a href="#about">Hakkımızda</a>
+      <a href="#contact">İletişim</a>
+      <button id="cart-btn" aria-label="Sepet">Sepet (<span id="cart-count">0</span>)</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section id="hero" class="hero">
+      <h1>Doğal Kayabaşı Arı Ürünleri — Bal, Polen, Propolis ve Daha Fazlası</h1>
+      <p>Yerel üretim, doğal ve taze ürünler. Hemen alışverişe başlayın.</p>
+      <a href="#shop" class="btn">Mağazaya Git</a>
+    </section>
+
+    <section id="shop" class="shop">
+      <aside class="filters">
+        <h3>Kategoriler</h3>
+        <select id="category-filter">
+          <option value="all">Tümü</option>
+        </select>
+      </aside>
+
+      <section class="products">
+        <div id="product-list" class="product-grid"></div>
+      </section>
+    </section>
+
+    <section id="about" class="about">
+      <h2>Hakkımızda</h2>
+      <p>Küçük ölçekli arıcılık ve doğal ürün satışı yapan Kayabaşı işletmesi. Bu proje ödev amaçlı hazırlanmıştır.</p>
+    </section>
+
+    <section id="contact" class="contact">
+      <h2>İletişim</h2>
+      <form id="contact-form">
+        <input name="name" placeholder="İsim" required />
+        <input name="email" type="email" placeholder="E-posta" required />
+        <textarea name="message" placeholder="Mesajınız"></textarea>
+        <button type="submit">Gönder</button>
+      </form>
+    </section>
+  </main>
+
+  <aside id="cart-drawer" class="cart-drawer" aria-hidden="true">
+    <header>Sepet <button id="close-cart">Kapat</button></header>
+    <div id="cart-items"></div>
+    <div class="cart-footer">
+      <div>Toplam: <strong id="cart-total">₺0.00</strong></div>
+      <button id="checkout-btn" class="btn">Ödeme Yap (Mock)</button>
+    </div>
+  </aside>
+
+  <footer class="site-footer">
+    <small>© 2025 Kayabaşı Arı Ürünleri — Ödev Projesi — <a href="https://github.com/ilyaskayabasi/ilyas.github.io">Kaynak</a></small>
+  </footer>
+
+  <script>
+    // Basit client-side JS: ürünleri data/products.json'dan çek, render et, sepet yönetimi (localStorage)
+    async function loadProducts(){
+      const res = await fetch('data/products.json');
+      const products = await res.json();
+      return products;
+    }
+
+    function formatPrice(cents){
+      return '₺' + (cents/100).toFixed(2);
+    }
+
+    function createProductCard(p){
+      const div = document.createElement('div'); div.className='product-card';
+      div.innerHTML = `
+        <img src="${p.images[0]}" alt="${p.title}" />
+        <h3>${p.title}</h3>
+        <p class="muted">${p.brand} • ${p.category}</p>
+        <div class="price">${formatPrice(p.price_cents)}</div>
+        <button class="add-to-cart" data-id="${p.id}">Sepete Ekle</button>
+      `;
+      return div;
+    }
+
+    function getCart(){ return JSON.parse(localStorage.getItem('bee_cart')||'[]'); }
+    function saveCart(cart){ localStorage.setItem('bee_cart', JSON.stringify(cart)); updateCartCount(); }
+
+    function addToCart(productId){
+      const cart = getCart();
+      const item = cart.find(i=>i.id===productId);
+      if(item) item.qty += 1; else cart.push({id:productId, qty:1});
+      saveCart(cart);
+    }
+
+    function updateCartCount(){
+      const cart = getCart();
+      const count = cart.reduce((s,i)=>s+i.qty,0);
+      document.getElementById('cart-count').textContent = count;
+    }
+
+    function renderProducts(products){
+      const list = document.getElementById('product-list');
+      list.innerHTML='';
+      products.forEach(p=> list.appendChild(createProductCard(p)));
+      list.querySelectorAll('.add-to-cart').forEach(btn=>{
+        btn.addEventListener('click', ()=> {
+          addToCart(btn.dataset.id);
+        });
+      });
+    }
+
+    async function init(){
+      const products = await loadProducts();
+      // populate categories
+      const cats = Array.from(new Set(products.map(p=>p.category)));
+      const sel = document.getElementById('category-filter');
+      cats.forEach(c=> sel.appendChild(new Option(c,c)));
+      sel.addEventListener('change', ()=> {
+        const val = sel.value;
+        renderProducts(val==='all' ? products : products.filter(p=>p.category===val));
+      });
+
+      renderProducts(products);
+      updateCartCount();
+      // cart drawer open
+      document.getElementById('cart-btn').addEventListener('click', ()=> {
+        document.getElementById('cart-drawer').style.display='block';
+        document.getElementById('cart-drawer').setAttribute('aria-hidden','false');
+        renderCart(products);
+      });
+      document.getElementById('close-cart').addEventListener('click', ()=> {
+        document.getElementById('cart-drawer').style.display='none';
+        document.getElementById('cart-drawer').setAttribute('aria-hidden','true');
+      });
+
+      document.getElementById('checkout-btn').addEventListener('click', ()=> {
+        alert('Bu demo checkout işlemini simüle eder. Gerçek ödeme entegrasyonu için server-side veya Stripe test anahtarları gerekir.');
+        // temizle
+        localStorage.removeItem('bee_cart');
+        updateCartCount();
+        document.getElementById('cart-drawer').style.display='none';
+      });
+
+      document.getElementById('contact-form').addEventListener('submit', (e)=>{
+        e.preventDefault();
+        alert('Mesajınız alındı (demo).');
+        e.target.reset();
+      });
+    }
+
+    function renderCart(products){
+      const itemsEl = document.getElementById('cart-items'); itemsEl.innerHTML='';
+      const cart = getCart();
+      let total = 0;
+      cart.forEach(ci=>{
+        const prod = products.find(p=>p.id===ci.id);
+        if(!prod) return;
+        const row = document.createElement('div'); row.className='cart-item';
+        row.innerHTML = `<div class="ci-left">
+          <img src="${prod.images[0]}" alt="" />
+        </div>
+        <div class="ci-mid">
+          <div class="ci-title">${prod.title}</div>
+          <div class="ci-qty">Adet: ${ci.qty}</div>
+        </div>
+        <div class="ci-right">${formatPrice(prod.price_cents * ci.qty)}</div>`;
+        itemsEl.appendChild(row);
+        total += prod.price_cents * ci.qty;
+      });
+      document.getElementById('cart-total').textContent = formatPrice(total);
+    }
+
+    init();
+  </script>
+</body>
+</html>
